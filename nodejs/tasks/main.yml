@@ -1,0 +1,44 @@
+- name: Download install script
+  get_url:
+    url: https://raw.githubusercontent.com/creationix/nvm/master/install.sh
+    dest: "{{home_dir}}/install-nvm.sh"
+    mode: 0600
+
+- name: Execute the nvm-installer.sh
+  shell: bash "{{home_dir}}/install-nvm.sh"
+  
+- name: Add nvm export commands to .profile
+  lineinfile:
+    path: "{{home_dir}}/.profile"
+    state: present
+    line: 'export NVM_DIR="$HOME/.nvm"'
+    regexp: '^export NVM_DIR.*'
+    insertafter: EOF
+
+- name: Add nvm export commands to .profile
+  lineinfile:
+    path: "{{home_dir}}/.profile"
+    state: present
+    line: '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"'
+    regexp: '^\[ -s "\$NVM_DIR/nvm.sh" \].*'
+    insertafter: EOF
+
+- name: install node boron LTS
+  shell: "{{item}}"
+  with_items:
+    - . ~/.profile && nvm install 6.10.3
+    - . ~/.profile && nvm alias default 6.10.3
+
+- name: Configure the Yarn APT key
+  apt_key: url=https://dl.yarnpkg.com/debian/pubkey.gpg
+
+- name: Add Yarn repository
+  apt_repository:
+    repo: 'deb https://dl.yarnpkg.com/debian/ stable main'
+    state: present
+
+- name: Install Yarn
+  apt: pkg=yarn={{ yarn_version }} state=present
+
+- name: Install pm2
+  shell: yarn global add pm2

@@ -1,0 +1,31 @@
+- name: Updates apt cache
+  apt:
+    update_cache: true
+
+- name: Install aptitude
+  apt:
+    name: aptitude
+    state: latest
+
+- name: Do full upgrade
+  apt:
+    upgrade: full
+
+- name: Installs curl, wget, and git
+  apt:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - wget
+    - curl
+    - git
+    - unzip
+    - mercurial
+    - make
+    - binutils
+    - bison
+    - gcc
+    - build-essential
+    - libssl-dev
+    - acl
+    

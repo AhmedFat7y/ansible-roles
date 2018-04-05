@@ -1,0 +1,13 @@
+server {
+	listen {{ site_port }} default_server;
+	listen [::]:{{ site_port }} default_server;
+	
+  root {{ project_location }};
+	index index.html index.htm;
+	
+  server_name {{ domain_names | join(' ') }};
+
+	location / {
+		try_files $uri $uri/ 404;
+	}
+}

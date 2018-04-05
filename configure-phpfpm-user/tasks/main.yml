@@ -1,0 +1,23 @@
+- name: Set www default pool to be on demand
+  lineinfile:
+    path: /etc/php/7.0/fpm/pool.d/www.conf
+    regexp: '^pm = \w+'
+    line: "pm = ondemand"
+    state: present
+
+- name: "Create a new php-fpm pool conf file for {{ deployer_user }}"
+  template:
+    src: php-pool.conf.j2
+    dest: "/etc/php/7.0/fpm/pool.d/{{ deployer_user }}.conf"
+    owner: root
+    group: root
+    mode: "u=rw,g=r,o=r"
+- name: Make sure /var/run/php7.0 directory exists
+  file:
+    state: directory
+    path: /var/run/php7.0
+
+- name: Restart php-fpm service
+  service:
+    name: php7.0-fpm
+    state: restarted
