@@ -1,0 +1,36 @@
+- name: Create {{ new_user.name }} sudo user account
+  user: 
+    name: "{{ new_user.name }}" 
+    shell: /bin/bash 
+    state: present 
+    generate_ssh_key: yes
+
+
+- name: Add public ssh key
+  authorized_key:
+    user: "{{ new_user.name }}"
+    key: "{{ new_user.key }}"
+    state: present
+
+- name: "Ensures /home/{{ new_user.name }} exists"
+  file:
+    path: "/home/{{ new_user.name }}"
+    state: directory
+    owner: "{{ new_user.name }}"
+    group: "{{ new_user.name }}"
+
+- name: "Set proper acl flags for {{ new_user.name }}"
+  acl:
+    path: "/home/{{ new_user.name }}"
+    entry: "u:{{ new_user.name }}:rwx"
+    state: present
+    recursive: yes
+    default: yes
+
+- name: Add user {{ new_user.name }} to sudoers
+  lineinfile:
+    dest: /etc/sudoers 
+    regexp: "^{{ new_user.name }} ALL" 
+    line: "{{ new_user.name }} ALL=(ALL) NOPASSWD: ALL"
+    state: present
+    validate: "visudo -cf %s"

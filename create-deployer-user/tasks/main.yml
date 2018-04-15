@@ -1,34 +1,29 @@
 - name: Create deployment user
   user:
-    name: "{{ deployer_user }}"
+    name: "{{ deployer_user.name }}"
     shell: /bin/bash
-  register: deployer_created
-
-- name: Add ssh key
-  authorized_key:
-    user: "{{ deployer_user }}"
-    key: "{{ lookup('file', 'ssh-keys/macair-fat7y.pub') }}"
     state: present
+    generate_ssh_key: yes
 
-- name: "Ensures /home/{{ deployer_user }} exists"
+- name: "Ensures /home/{{ deployer_user.name }} exists"
   file:
-    path: "/home/{{ deployer_user }}"
+    path: "/home/{{ deployer_user.name }}"
     state: directory
-    owner: "{{ deployer_user }}"
-    group: "{{ deployer_group }}"
+    owner: "{{ deployer_user.name }}"
+    group: "{{ deployer_user.group }}"
 
-- name: "Set proper acl flags for {{ deployer_user }}"
+- name: "Set proper acl flags for {{ deployer_user.name }}"
   acl:
-    path: "/home/{{ deployer_user }}"
-    entry: "u:{{ deployer_user }}:rwx"
+    path: "/home/{{ deployer_user.name }}"
+    entry: "u:{{ deployer_user.name }}:rwx"
     state: present
     recursive: yes
     default: yes
 
 - name: set proper acl flags for www-data group
   acl:
-    path: "/home/{{ deployer_user }}"
-    entry: "g:{{ deployer_group }}:rx"
+    path: "/home/{{ deployer_user.name }}"
+    entry: "g:{{ deployer_user.group }}:rx"
     state: present
     recursive: yes
     default: yes
@@ -37,30 +32,20 @@
   file:
     path: "{{ project_location }}"
     state: directory
-    group: "{{ deployer_group }}"
-    owner: "{{ deployer_user }}"
+    group: "{{ deployer_user.group }}"
+    owner: "{{ deployer_user.name }}"
 
-# - name: "Ensure permissions on /home/{{ deployer_user }}"
-#   shell: chmod 2750 -R /home/{{ deployer_user }}
+# - name: "Ensure permissions on /home/{{ deployer_user.name }}"
+#   shell: chmod 2750 -R /home/{{ deployer_user.name }}
 
-- name: "Ensure /home/{{ deployer_user }}/.ssh exists"
+- name: "Ensure /home/{{ deployer_user.name }}/.ssh exists"
   file:
-    path: "/home/{{ deployer_user }}/.ssh"
+    path: "/home/{{ deployer_user.name }}/.ssh"
     state: directory
-    owner: "{{ deployer_user }}"
-  
-- name: Copy deployer private key to remote machine
-  copy:
-    src: deployer_user
-    dest: "/home/{{ deployer_user }}/.ssh/id_rsa"
-    mode: 0400
-    group: "{{ deployer_user }}"
-    owner: "{{ deployer_user }}"
+    owner: "{{ deployer_user.name }}"
 
-- name: Copy deployer public key to remote machine
-  copy:
-    src: "deployer_user.pub"
-    dest: "/home/{{ deployer_user }}/.ssh/id_rsa.pub"
-    mode: 0644
-    group: "{{ deployer_user }}"
-    owner: "{{ deployer_user }}"
+- name: Add  deployer public ssh key
+  authorized_key:
+    user: "{{ deployer_user.name }}"
+    key: "{{ deployer_user.key }}"
+    state: present

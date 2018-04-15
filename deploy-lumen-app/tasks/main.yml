@@ -9,14 +9,14 @@
     accept_hostkey: True
     force: True
   become: true
-  become_user: "{{ deployer_user }}"
+  become_user: "{{ deployer_user.name }}"
 
 - name: Run composer Install & Update 
   shell: composer update  
   args:
     chdir: "{{ project_location }}"
   become: true
-  become_user: "{{ deployer_user }}"
+  become_user: "{{ deployer_user.name }}"
   with_items:
     - composer install
     - composer update
@@ -26,8 +26,8 @@
   template:
     src: env
     dest: "{{ project_location }}/.env"
-    owner: "{{ deployer_user }}"
-    group: "{{ deployer_user }}"
+    owner: "{{ deployer_user.name }}"
+    group: "{{ deployer_user.name }}"
     mode: 0400
   when: server_state == 'SETUP'
 
@@ -36,4 +36,4 @@
   args:
     chdir: "{{ project_location }}"
   become: true
-  become_user: "{{ deployer_user }}"
+  become_user: "{{ deployer_user.name }}"

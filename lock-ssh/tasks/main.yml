@@ -1,0 +1,30 @@
+- name: Lock the root user (use 'sudo passwd root' to re-enable)
+  command: passwd -l root
+
+- name: Remove sudo group rights
+  lineinfile: 
+  dest: /etc/sudoers 
+  regexp: "^%sudo" 
+  state: absent 
+  validate: 'visudo -cf %s'
+
+- name: Update ssh parameters
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    state: present
+    regexp: "^{{ item.key }}"
+    line: "{{ item.key }} {{ item.value }}"
+    insertafter: EOF
+  with_items:
+    - { key: 'Port', value: '22' }
+    - { key: 'PermitRootLogin', value: 'no' }
+    - { key: 'PasswordAuthentication', value: 'no' }
+    - { key: 'LoginGraceTime', value: '20' }
+    - { key: 'X11Forwarding', value: 'no' }
+    - { key: 'AllowUsers', value: "{{ ssh_users | default('root') }}" }
+  register: changed_ssh_config
+  ignore_errors: True
+
+- name: Restart sshd
+  service: name=ssh state=restarted
+  when: changed_ssh_config|success

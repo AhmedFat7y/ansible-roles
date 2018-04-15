@@ -1,6 +1,6 @@
 server {
-	listen {{ site_port }} default_server;
-	listen [::]:{{ site_port }} default_server;
+	listen {{ site_port | default(80) }} default_server;
+	listen [::]:{{ {{ site_port | default(80) }} default_server;
 	
   root {{ project_location }};
 	index index.html index.htm;

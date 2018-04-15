@@ -1,6 +1,11 @@
-- name: Updates apt cache
-  apt:
-    update_cache: true
+- name: Update apt keys
+  command: apt-key update
+
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Run apt upgrade
+  apt: upgrade=yes
 
 - name: Install aptitude
   apt:
@@ -28,4 +33,7 @@
     - build-essential
     - libssl-dev
     - acl
-    
+    - unattended-upgrades
+
+- name: Adjust APT update intervals
+  copy: src=apt_periodic dest=/etc/apt/apt.conf.d/10periodic

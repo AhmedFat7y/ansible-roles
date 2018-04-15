@@ -1,7 +1,7 @@
-[{{ deployer_user }}]
-user = {{ deployer_user }}
-group = {{ deployer_user }}
-listen = /var/run/php7.0_{{ deployer_user }}.sock
+[{{ deployer_user.name }}]
+user = {{ deployer_user.name }}
+group = {{ deployer_user.name }}
+listen = /var/run/php7.0_{{ deployer_user.name }}.sock
 listen.owner = www-data
 listen.group = www-data
 php_admin_value[disable_functions] = exec,passthru,shell_exec,system

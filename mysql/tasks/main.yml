@@ -6,7 +6,7 @@
     - python-mysqldb
     - libmysqlclient-dev
 
-- name: Restart msql service
+- name: Start msql service
   service:
     name: mysql
     state: started
@@ -34,3 +34,18 @@
   service:
     name: mysql
     state: restarted
+
+- name: Create new database {{ database.name }}
+  mysql_db:
+    name: "{{ database.name }}"
+    state: present
+    encoding: "{{ database.encoding | default('utf8') }}"
+
+- name: Create new user {{ database.user.name }} for database {{ database.name }}
+  mysql_user:
+    name: "{{ database.user.name }}"
+    password: "{{ database.user.password }}"
+    priv: "{{ database.name }}".*:ALL
+    host: "{{ database.user.host }}"
+    state: present
+    
