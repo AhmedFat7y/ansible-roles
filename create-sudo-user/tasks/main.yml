@@ -1,16 +1,18 @@
-- name: Create {{ new_user.name }} sudo user account
+- name: "Create {{ new_user.name }} sudo user account"
   user: 
     name: "{{ new_user.name }}" 
     shell: /bin/bash 
     state: present 
     generate_ssh_key: yes
 
-
 - name: Add public ssh key
   authorized_key:
     user: "{{ new_user.name }}"
-    key: "{{ new_user.key }}"
+    key: "{{ public_key }}"
     state: present
+  loop: "{{ new_user.public_keys }}"
+  loop_control:
+    loop_var: public_key
 
 - name: "Ensures /home/{{ new_user.name }} exists"
   file:
@@ -27,7 +29,7 @@
     recursive: yes
     default: yes
 
-- name: Add user {{ new_user.name }} to sudoers
+- name: "Add user {{ new_user.name }} to sudoers"
   lineinfile:
     dest: /etc/sudoers 
     regexp: "^{{ new_user.name }} ALL" 

@@ -22,10 +22,13 @@
   when: erlang_solutions_is_installed.rc == 1
 
 - name: Installs erlang and elixir
-  apt: pkg={{ item }} state=latest
-  with_items:
+  apt: pkg={{ package_name }} state=latest
+  loop:
     - esl-erlang
     - elixir
+  loop_control:
+    loop_var: package_name
+
 - name: install hex
   command: mix local.hex --force
 

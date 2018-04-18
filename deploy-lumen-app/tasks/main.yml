@@ -12,14 +12,16 @@
   become_user: "{{ deployer_user.name }}"
 
 - name: Run composer Install & Update 
-  shell: composer update  
+  shell: "{{ composer_command }}"  
   args:
     chdir: "{{ project_location }}"
   become: true
   become_user: "{{ deployer_user.name }}"
-  with_items:
+  loop:
     - composer install
     - composer update
+  loop_control:
+    loop_var: composer_command
 
 # need to copy .env file and make sure it points to correct database
 - name: Copy .env file to lumen app directory

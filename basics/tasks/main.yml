@@ -18,9 +18,9 @@
 
 - name: Installs curl, wget, and git
   apt:
-    name: "{{ item }}"
+    name: "{{ package_name }}"
     state: latest
-  with_items:
+  loop:
     - wget
     - curl
     - git
@@ -34,6 +34,8 @@
     - libssl-dev
     - acl
     - unattended-upgrades
+  loop_control:
+    loop_var: package_name
 
 - name: Adjust APT update intervals
   copy: src=apt_periodic dest=/etc/apt/apt.conf.d/10periodic

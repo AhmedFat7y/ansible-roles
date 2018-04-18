@@ -5,7 +5,7 @@
     plan: "{{linode_plan}}"
     datacenter: "{{linode_datacenter}}"
     distribution: "{{linode_distro}}"
-    # private_ip: yes
+    private_ip: yes
     ssh_pub_key: "{{ linode_ssh_key }}"
     swap: 768
     wait: yes

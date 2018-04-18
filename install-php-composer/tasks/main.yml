@@ -1,5 +1,7 @@
 - name: Install composer
-  shell: "{{ item }}"
-  with_items:
+  shell: "{{ install_command }}"
+  loop:
     - curl -s https://getcomposer.org/installer | php
     - mv composer.phar /usr/local/bin/composer
+  loop_control:
+    loop_var: install_command

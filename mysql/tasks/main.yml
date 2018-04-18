@@ -1,20 +1,20 @@
 - name: Install the MySQL packages
-  apt: name={{ item }} state=installed update_cache=yes
-  with_items:
+  apt: name={{ package_name }} state=present update_cache=yes
+  loop:
     - mysql-server
     - mysql-client
     - python-mysqldb
     - libmysqlclient-dev
+  loop_control:
+    loop_var: package_name
 
-- name: Start msql service
+- name: Start mysql service
   service:
     name: mysql
     state: started
 
 - name: Update MySQL root password for all root accounts
-  mysql_user: name=root host={{ item }} password={{ mysql_root_pass }} state=present
-  with_items:
-    - localhost
+  mysql_user: name=root host=localhost password={{ mysql_root_pass }} state=present
 
 - name: Create .my.cnf with new credentials
   template:
@@ -22,18 +22,16 @@
     dest: /root/.my.cnf
 
 - name: Ensure Anonymous user(s) are not in the database
-  mysql_user: name='' host={{ item }} state=absent
-  with_items:
+  mysql_user: name='' host={{ user_host }} state=absent
+  loop:
     - localhost
-    - "{{ ansible_hostname }}"
+    - "{{ ansible_host }}"
+    - "*"
+  loop_control:
+    loop_var: user_host
 
 - name: Remove the test database
   mysql_db: name=test state=absent
-
-- name: Restart msql service
-  service:
-    name: mysql
-    state: restarted
 
 - name: Create new database {{ database.name }}
   mysql_db:
@@ -45,7 +43,21 @@
   mysql_user:
     name: "{{ database.user.name }}"
     password: "{{ database.user.password }}"
-    priv: "{{ database.name }}".*:ALL
-    host: "{{ database.user.host }}"
+    priv: "{{ database.name }}.*:ALL"
+    host: "{{ database_user_host }}"
     state: present
-    
+  loop: "{{ database.user.hosts }}"
+  loop_control:
+    loop_var: database_user_host
+
+- name: Change mysql bind-address to private ip
+  lineinfile:
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf 
+    regexp: '^bind-address\s*=\s*.*'
+    line: "bind-address           = {{ private_ip }}"
+    state: present
+
+- name: Restart msql service
+  service:
+    name: mysql
+    state: restarted

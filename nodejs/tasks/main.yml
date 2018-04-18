@@ -24,10 +24,12 @@
     insertafter: EOF
 
 - name: install node boron LTS
-  shell: "{{item}}"
-  with_items:
+  shell: "{{ node_command }}"
+  loop:
     - . ~/.profile && nvm install 6.10.3
     - . ~/.profile && nvm alias default 6.10.3
+  loop_control:
+    loop_var: node_command
 
 - name: Configure the Yarn APT key
   apt_key: url=https://dl.yarnpkg.com/debian/pubkey.gpg

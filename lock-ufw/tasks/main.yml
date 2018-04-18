@@ -1,15 +1,19 @@
 - name: Configure ufw defaults
-  ufw: direction={{ item.direction }} policy={{ item.policy }}
-  with_items:
-    - { direction: 'incoming', policy: 'deny' }
+  ufw: direction={{ ufw_rule.direction }} policy={{ ufw_rule.policy }}
+  loop:
+    - { direction: 'incoming', policy: 'reject' }
     - { direction: 'outgoing', policy: 'allow' }
+  loop_control:
+    loop_var: ufw_rule
 
 - name: Configure ufw rules
-  ufw: rule={{ item.rule }} port={{ item.port }} proto={{ item.proto }}
-  with_items:
+  ufw: rule={{ ufw_rule.rule }} port={{ ufw_rule.port }} proto={{ ufw_rule.proto }}
+  loop:
     - { rule: 'limit', port: '22', proto: 'tcp' }
     - { rule: 'allow', port: '80', proto: 'tcp' }
     - { rule: 'allow', port: '443', proto: 'tcp' }
+  loop_control:
+    loop_var: ufw_rule
 
 - name: Enable ufw logging
   ufw: logging=on

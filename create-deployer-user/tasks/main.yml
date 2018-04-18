@@ -35,9 +35,6 @@
     group: "{{ deployer_user.group }}"
     owner: "{{ deployer_user.name }}"
 
-# - name: "Ensure permissions on /home/{{ deployer_user.name }}"
-#   shell: chmod 2750 -R /home/{{ deployer_user.name }}
-
 - name: "Ensure /home/{{ deployer_user.name }}/.ssh exists"
   file:
     path: "/home/{{ deployer_user.name }}/.ssh"
@@ -47,5 +44,8 @@
 - name: Add  deployer public ssh key
   authorized_key:
     user: "{{ deployer_user.name }}"
-    key: "{{ deployer_user.key }}"
+    key: "{{ public_key }}"
     state: present
+  loop: "{{ deployer_user.public_keys }}"
+  loop_control:
+    loop_var: public_key
